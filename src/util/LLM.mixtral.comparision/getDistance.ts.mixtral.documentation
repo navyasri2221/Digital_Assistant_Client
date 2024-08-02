@@ -1,0 +1,82 @@
+/**
+ * Calculate the distance between two nodes.
+ *
+ * This function calculates the Euclidean distance between two nodes. The nodes can have different screen sizes,
+ * and the function will take that into account when calculating the distance.
+ *
+ * @param {Object} node1 - The first node. This object must have the following properties:
+ *   - nodePagePosition: An object with 'left' and 'top' properties representing the position of the node on the page.
+ *   - screenSize (optional): An object with a 'screen' property, which is an object with 'width' and 'height' properties.
+ *   - nodePosition: An object with 'x' and 'y' properties representing the position of the node.
+ * @param {Object} node2 - The second node. This object must have the following properties:
+ *   - nodePagePosition: An object with 'left' and 'top' properties representing the position of the node on the page.
+ *   - screenSize (optional): An object with a 'screen' property, which is an object with 'width' and 'height' properties.
+ *   - nodePosition: An object with 'x' and 'y' properties representing the position of the node.
+ * @returns {number|null} The distance between the two nodes, or null if an error occurs.
+ *
+ * @throws {Error} If either node1 or node2 is not provided.
+ * @throws {Error} If either node does not have the required properties.
+ * @throws {Error} If the calculated distance is not a number.
+ */
+export const getDistance = (node1, node2) => {
+  try {
+    // Validate that both nodes are provided
+    if (!node1 || !node2) {
+      throw new Error("Both node1 and node2 must be provided.");
+    }
+
+    // Validate that node1 and node2 have the required properties
+    const validateNode = (node) => {
+      if (!node.hasOwnProperty('nodePagePosition') || !node.nodePagePosition.hasOwnProperty('left') || !node.nodePagePosition.hasOwnProperty('top')) {
+        throw new Error("Each node must have 'nodePagePosition' with 'left' and 'top' properties.");
+      }
+      if (node.hasOwnProperty('screenSize') && (!node.screenSize.hasOwnProperty('screen') || !node.screenSize.screen.hasOwnProperty('width') || !node.screenSize.screen.hasOwnProperty('height'))) {
+        throw new Error("If 'screenSize' is provided, it must have 'screen' with 'width' and 'height' properties.");
+      }
+      if (!node.hasOwnProperty('nodePosition') || !node.nodePosition.hasOwnProperty('x') || !node.nodePosition.hasOwnProperty('y')) {
+        throw new Error("Each node must have 'nodePosition' with 'x' and 'y' properties.");
+      }
+    };
+
+    validateNode(node1);
+    validateNode(node2);
+
+    let dist;
+    if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) {
+      let x, y;
+      // if screen size is available then calculating distance based on screen size
+      if (node1.screenSize.screen.width && node1.screenSize.screen.height) {
+        if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+          x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+          y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+        } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+          x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+          y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+        } else {
+          x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+          y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+        }
+      } else {
+        x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+        y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+      }
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    } else {
+      if (!node1.hasOwnProperty('nodePosition') || !node2.hasOwnProperty('nodePosition')) {
+        throw new Error("Both nodes must have 'nodePosition' property.");
+      }
+      const x = node1.nodePosition.x - node2.nodePosition.x;
+      const y = node1.nodePosition.y - node2.nodePosition.y;
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    }
+
+    if (isNaN(dist)) {
+      throw new Error("Calculated distance is not a number.");
+    }
+
+    return dist;
+  } catch (error) {
+    console.error("Error calculating distance:", error.message);
+    return null; // or any other value that indicates an error
+  }
+};
