@@ -1,0 +1,85 @@
+/**
+ * Calculates the distance between two nodes based on their positions.
+ *
+ * @param {Object} node1 - The first node object.
+ * @param {Object} node2 - The second node object.
+ * @returns {number} The calculated distance between the nodes.
+ * @throws {Error} If required properties are missing or invalid in the input nodes.
+ *
+ * @example
+ * const node1 = {
+ *   nodePagePosition: { left: 100, top: 200 },
+ *   screenSize: { screen: { width: 1920, height: 1080 } }
+ * };
+ * const node2 = {
+ *   nodePagePosition: { left: 300, top: 400 },
+ *   screenSize: { screen: { width: 1920, height: 1080 } }
+ * };
+ * const distance = getDistance(node1, node2);
+ * console.log(distance);
+ */
+export const getDistance = (node1, node2) => {
+  // Validate that both node1 and node2 are provided
+  if (!node1 || !node2) {
+    throw new Error('Both node1 and node2 are required.');
+  }
+
+  // Validate that nodePagePosition exists in both nodes
+  if (!node1.nodePagePosition || !node2.nodePagePosition) {
+    throw new Error('nodePagePosition is missing in one or both nodes.');
+  }
+
+  // Validate that nodePagePosition has left and top properties
+  if (!node1.nodePagePosition.hasOwnProperty('left') || !node1.nodePagePosition.hasOwnProperty('top') ||
+      !node2.nodePagePosition.hasOwnProperty('left') || !node2.nodePagePosition.hasOwnProperty('top')) {
+    throw new Error('nodePagePosition.left or nodePagePosition.top is missing in one or both nodes.');
+  }
+
+  let dist;
+  if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) {
+    // Validate that screenSize has screen property
+    if (!node1.screenSize.hasOwnProperty('screen') || !node2.screenSize.hasOwnProperty('screen')) {
+      throw new Error('screenSize.screen is missing in one or both nodes.');
+    }
+
+    let x, y;
+    // if screen size is available then calculating distance based on screen size
+    if (node1.screenSize.screen.width && node1.screenSize.screen.height) {
+      // Validate that screenSize.screen has width and height properties
+      if (!node2.screenSize.screen.hasOwnProperty('width') || !node2.screenSize.screen.hasOwnProperty('height')) {
+        throw new Error('screenSize.screen.width or screenSize.screen.height is missing in node2.');
+      }
+
+      if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+        x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+        y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+      } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+        x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+        y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+      } else {
+        x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+        y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+      }
+    } else {
+      x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+      y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+    }
+    dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+  } else {
+    // Validate that nodePosition exists in both nodes
+    if (!node1.nodePosition || !node2.nodePosition) {
+      throw new Error('nodePosition is missing in one or both nodes.');
+    }
+
+    // Validate that nodePosition has x and y properties
+    if (!node1.nodePosition.hasOwnProperty('x') || !node1.nodePosition.hasOwnProperty('y') ||
+        !node2.nodePosition.hasOwnProperty('x') || !node2.nodePosition.hasOwnProperty('y')) {
+      throw new Error('nodePosition.x or nodePosition.y is missing in one or both nodes.');
+    }
+
+    const x = node1.nodePosition.x - node2.nodePosition.x;
+    const y = node1.nodePosition.y - node2.nodePosition.y;
+    dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+  }
+  return dist;
+};

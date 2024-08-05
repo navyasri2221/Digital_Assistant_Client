@@ -1,0 +1,79 @@
+/**
+ * Calculate the distance between two nodes.
+ *
+ * This function calculates the Euclidean distance between two nodes. The nodes can either have
+ * screen size information or just position information. If screen size information is available,
+ * the distance is calculated based on the screen size and node page position. Otherwise, the
+ * distance is calculated based on the node position.
+ *
+ * @param {Object} node1 - The first node object. This object must have either:
+ *   - `nodePagePosition` with `left` and `top` properties, and optionally,
+ *   - `screenSize` with `screen` containing `width` and `height` properties.
+ *   - OR `nodePosition` with `x` and `y` properties.
+ * @param {Object} node2 - The second node object. This object must have either:
+ *   - `nodePagePosition` with `left` and `top` properties, and optionally,
+ *   - `screenSize` with `screen` containing `width` and `height` properties.
+ *   - OR `nodePosition` with `x` and `y` properties.
+ * @returns {number|null} - The distance between the two nodes, or `null` if an error occurs.
+ *
+ * @throws {Error} - Throws an error if either `node1` or `node2` is not provided, or if they do not
+ *   have the required properties.
+ */
+export const getDistance = (node1, node2) => {
+  if (!node1 || !node2) {
+    throw new Error('Both node1 and node2 must be provided');
+  }
+
+  if (typeof node1 !== 'object' || typeof node2 !== 'object') {
+    throw new Error('Both node1 and node2 must be objects');
+  }
+
+  const validateNode = (node) => {
+    if (!node.hasOwnProperty('nodePagePosition') || !node.nodePagePosition.hasOwnProperty('left') || !node.nodePagePosition.hasOwnProperty('top')) {
+      throw new Error('Each node must have nodePagePosition with left and top properties');
+    }
+
+    if (node.hasOwnProperty('screenSize')) {
+      if (!node.screenSize.hasOwnProperty('screen') || !node.screenSize.screen.hasOwnProperty('width') || !node.screenSize.screen.hasOwnProperty('height')) {
+        throw new Error('If screenSize is present, it must have screen with width and height properties');
+      }
+    } else if (!node.hasOwnProperty('nodePosition') || !node.nodePosition.hasOwnProperty('x') || !node.nodePosition.hasOwnProperty('y')) {
+      throw new Error('If screenSize is not present, each node must have nodePosition with x and y properties');
+    }
+  };
+
+  try {
+    validateNode(node1);
+    validateNode(node2);
+
+    let dist;
+    if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) {
+      let x, y;
+      // if screen size is available then calculating distance based on screen size
+      if (node1.screenSize.screen.width && node1.screenSize.screen.height) {
+        if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+          x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+          y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+        } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+          x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+          y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+        } else {
+          x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+          y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+        }
+      } else {
+        x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+        y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+      }
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    } else {
+      const x = node1.nodePosition.x - node2.nodePosition.x;
+      const y = node1.nodePosition.y - node2.nodePosition.y;
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    }
+    return dist;
+  } catch (error) {
+    console.error('Error calculating distance:', error.message);
+    return null;
+  }
+};
