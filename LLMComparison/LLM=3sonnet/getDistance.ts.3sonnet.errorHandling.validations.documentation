@@ -1,0 +1,74 @@
+/**
+ * calculate distance between selected node and matching node
+ * @param {Object} node1 - The first node object
+ * @param {Object} node2 - The second node object
+ * @param {Object} [node1.screenSize] - The screen size information for node1
+ * @param {Object} [node1.screenSize.screen] - The screen object for node1
+ * @param {number} [node1.screenSize.screen.width] - The screen width for node1
+ * @param {number} [node1.screenSize.screen.height] - The screen height for node1
+ * @param {Object} [node1.nodePagePosition] - The page position information for node1
+ * @param {number} [node1.nodePagePosition.left] - The left position of node1 on the page
+ * @param {number} [node1.nodePagePosition.top] - The top position of node1 on the page
+ * @param {Object} [node1.nodePosition] - The position information for node1
+ * @param {number} [node1.nodePosition.x] - The x-coordinate of node1
+ * @param {number} [node1.nodePosition.y] - The y-coordinate of node1
+ * @param {Object} [node2.screenSize] - The screen size information for node2
+ * @param {Object} [node2.screenSize.screen] - The screen object for node2
+ * @param {number} [node2.screenSize.screen.width] - The screen width for node2
+ * @param {number} [node2.screenSize.screen.height] - The screen height for node2
+ * @param {Object} [node2.nodePagePosition] - The page position information for node2
+ * @param {number} [node2.nodePagePosition.left] - The left position of node2 on the page
+ * @param {number} [node2.nodePagePosition.top] - The top position of node2 on the page
+ * @param {Object} [node2.nodePosition] - The position information for node2
+ * @param {number} [node2.nodePosition.x] - The x-coordinate of node2
+ * @param {number} [node2.nodePosition.y] - The y-coordinate of node2
+ * @returns {number} The distance between node1 and node2
+ * @throws {Error} If node1 or node2 is missing or not an object
+ * @throws {Error} If required properties are missing or invalid
+ */
+export const getDistance = (node1, node2) => {
+  try {
+    // Validate input parameters
+    if (!node1 || !node2) {
+      throw new Error('Invalid input: node1 and node2 are required');
+    }
+
+    if (typeof node1 !== 'object' || typeof node2 !== 'object') {
+      throw new Error('Invalid input: node1 and node2 must be objects');
+    }
+
+    let dist;
+    if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) {
+      let x, y;
+      // if screen size is available then calculating distance based on screen size
+      if (node1.screenSize.screen && node1.screenSize.screen.width && node1.screenSize.screen.height) {
+        if (node2.screenSize.screen && node2.screenSize.screen.width && node2.screenSize.screen.height) {
+          if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+            x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+            y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+          } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+            x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+            y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+          } else {
+            x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+            y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+          }
+        } else {
+          throw new Error('Invalid input: node2.screenSize.screen or its properties are missing');
+        }
+      } else {
+        throw new Error('Invalid input: node1.screenSize.screen or its properties are missing');
+      }
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    } else {
+      const x = node1.nodePosition.x - node2.nodePosition.x;
+      const y = node1.nodePosition.y - node2.nodePosition.y;
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    }
+    return dist;
+  } catch (error) {
+    // Handle errors here
+    console.error('Error in getDistance:', error);
+    throw error;
+  }
+};

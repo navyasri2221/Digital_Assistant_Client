@@ -1,0 +1,37 @@
+/**
+ * Calculates the distance between two nodes based on their screen positions or coordinates.
+ * 
+ * This function handles two types of node structures:
+ * 1. Nodes with screenSize and nodePagePosition properties
+ * 2. Nodes with nodePosition properties
+ * 
+ * For nodes with screenSize, it adjusts the calculation based on the relative screen sizes.
+ * For nodes with nodePosition, it calculates the direct Euclidean distance.
+ * 
+ * @param node1 - The first node object to compare
+ * @param node2 - The second node object to compare
+ * 
+ * @returns The calculated distance between the two nodes as a number
+ * 
+ * @throws {Error} If the input nodes are invalid or missing required properties
+ * 
+ * @example
+ * // For nodes with screenSize
+ * const node1 = {
+ *   screenSize: { screen: { width: 1920, height: 1080 } },
+ *   nodePagePosition: { left: 100, top: 200 }
+ * };
+ * const node2 = {
+ *   screenSize: { screen: { width: 1280, height: 720 } },
+ *   nodePagePosition: { left: 80, top: 150 }
+ * };
+ * const distance1 = getDistance(node1, node2);
+ * 
+ * // For nodes with nodePosition
+ * const node3 = { nodePosition: { x: 10, y: 20 } };
+ * const node4 = { nodePosition: { x: 30, y: 40 } };
+ * const distance2 = getDistance(node3, node4);
+ */
+export const getDistance = (node1: any, node2: any): number => {
+  // Function implementation...
+};
