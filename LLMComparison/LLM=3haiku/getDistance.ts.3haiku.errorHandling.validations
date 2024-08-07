@@ -1,0 +1,81 @@
+/**
+ * calculate distance between selected node and matching node
+ * @param1: recorded node
+ * @param2: comparing node
+ */
+export const getDistance = (node1, node2) => {
+  try {
+    // Validate input parameters
+    if (!node1 || typeof node1 !== 'object') {
+      throw new Error('Invalid node1 parameter. Expected an object.');
+    }
+    if (!node2 || typeof node2 !== 'object') {
+      throw new Error('Invalid node2 parameter. Expected an object.');
+    }
+
+    let dist;
+    if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) {
+      // Validate node1.screenSize and node2.screenSize properties
+      if (!node1.screenSize || typeof node1.screenSize !== 'object') {
+        throw new Error('Invalid node1.screenSize property. Expected an object.');
+      }
+      if (!node2.screenSize || typeof node2.screenSize !== 'object') {
+        throw new Error('Invalid node2.screenSize property. Expected an object.');
+      }
+      if (!node1.screenSize.screen || typeof node1.screenSize.screen !== 'object') {
+        throw new Error('Invalid node1.screenSize.screen property. Expected an object.');
+      }
+      if (!node2.screenSize.screen || typeof node2.screenSize.screen !== 'object') {
+        throw new Error('Invalid node2.screenSize.screen property. Expected an object.');
+      }
+      if (typeof node1.screenSize.screen.width !== 'number' || typeof node1.screenSize.screen.height !== 'number') {
+        throw new Error('Invalid node1.screenSize.screen.width or node1.screenSize.screen.height property. Expected a number.');
+      }
+      if (typeof node2.screenSize.screen.width !== 'number' || typeof node2.screenSize.screen.height !== 'number') {
+        throw new Error('Invalid node2.screenSize.screen.width or node2.screenSize.screen.height property. Expected a number.');
+      }
+
+      let x, y;
+      // if screen size is available then calculating distance based on screen size
+      if (node1.screenSize.screen.width && node1.screenSize.screen.height) {
+        if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+          x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+          y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+        } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+          x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+          y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+        } else {
+          x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+          y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+        }
+      } else {
+        x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+        y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+      }
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    } else {
+      // Validate node1.nodePosition and node2.nodePosition properties
+      if (!node1.nodePosition || typeof node1.nodePosition !== 'object') {
+        throw new Error('Invalid node1.nodePosition property. Expected an object.');
+      }
+      if (!node2.nodePosition || typeof node2.nodePosition !== 'object') {
+        throw new Error('Invalid node2.nodePosition property. Expected an object.');
+      }
+      if (typeof node1.nodePosition.x !== 'number' || typeof node1.nodePosition.y !== 'number') {
+        throw new Error('Invalid node1.nodePosition.x or node1.nodePosition.y property. Expected a number.');
+      }
+      if (typeof node2.nodePosition.x !== 'number' || typeof node2.nodePosition.y !== 'number') {
+        throw new Error('Invalid node2.nodePosition.x or node2.nodePosition.y property. Expected a number.');
+      }
+
+      const x = node1.nodePosition.x - node2.nodePosition.x;
+      const y = node1.nodePosition.y - node2.nodePosition.y;
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    }
+
+    return dist;
+  } catch (error) {
+    console.error('Error in getDistance function:', error);
+    throw error;
+  }
+};

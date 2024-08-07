@@ -1,0 +1,86 @@
+/**
+ * calculate distance between selected node and matching node
+ * @param1: recorded node
+ * @param2: comparing node
+ */
+export const getDistance = (node1: any, node2: any) => {
+  let dist;
+  try {
+    // Input validations
+    if (!node1 || !node2) {
+      console.error('Error: Invalid input nodes.');
+      return 0; // Or throw an error depending on your error handling strategy
+    }
+
+    if (
+      !node1.hasOwnProperty('nodePagePosition') ||
+      !node2.hasOwnProperty('nodePagePosition') ||
+      !node1.nodePagePosition.hasOwnProperty('left') ||
+      !node1.nodePagePosition.hasOwnProperty('top') ||
+      !node2.nodePagePosition.hasOwnProperty('left') ||
+      !node2.nodePagePosition.hasOwnProperty('top')
+    ) {
+      console.error('Error: Missing required node position properties.');
+      return 0;
+    }
+
+    // Optional screenSize validation - only check if screenSize exists on both nodes
+    if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) { 
+      if (
+        !node1.screenSize.hasOwnProperty('screen') ||
+        !node2.screenSize.hasOwnProperty('screen') ||
+        !node1.screenSize.screen?.hasOwnProperty('width') ||
+        !node1.screenSize.screen?.hasOwnProperty('height') ||
+        !node2.screenSize.screen?.hasOwnProperty('width') ||
+        !node2.screenSize.screen?.hasOwnProperty('height')
+      ) {
+        console.error('Error: Missing required screen size properties.');
+        return 0;
+      }
+
+      // If screen size is available and any of the width or height is 0 or negative, then fall back to using nodePosition
+      if (
+        node1.screenSize.screen?.width <= 0 ||
+        node1.screenSize.screen?.height <= 0 ||
+        node2.screenSize.screen?.width <= 0 ||
+        node2.screenSize.screen?.height <= 0
+      ) {
+        console.warn('Warning: Invalid screen size detected. Using nodePosition instead.');
+        const x = node1.nodePosition.x - node2.nodePosition.x;
+        const y = node1.nodePosition.y - node2.nodePosition.y;
+        dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+        return dist;
+      }
+    }
+
+    if (node1.hasOwnProperty('screenSize') && node2.hasOwnProperty('screenSize')) {
+      let x, y;
+      // if screen size is available then calculating distance based on screen size
+      if(node1.screenSize.screen?.width && node1.screenSize.screen?.height) { 
+        if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+          x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+          y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+        } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+          x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+          y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+        } else {
+          x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+          y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+        }
+      } else {
+        x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+        y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+      }
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    } else {
+      const x = node1.nodePosition.x - node2.nodePosition.x;
+      const y = node1.nodePosition.y - node2.nodePosition.y;
+      dist = Math.abs(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    }
+  } catch (error) {
+    console.error('Error calculating distance:', error);
+    // Handle the error, e.g., return a default value or re-throw the error
+    dist = 0; // Example: return 0 as the distance
+  }
+  return dist;
+};

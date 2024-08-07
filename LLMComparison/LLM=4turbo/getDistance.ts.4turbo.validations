@@ -1,0 +1,53 @@
+/**
+ * calculate distance between selected node and matching node
+ * @param node1: recorded node
+ * @param node2: comparing node
+ */
+export const getDistance = (node1: any, node2: any): number => {
+  try {
+    // Validate input nodes
+    if (!node1 || !node2) {
+      throw new Error("Both nodes must be provided.");
+    }
+
+    // Validate properties of node1 and node2
+    if (!node1.screenSize || !node2.screenSize) {
+      throw new Error("Both nodes must have a 'screenSize' property.");
+    }
+    if (!node1.nodePagePosition || !node2.nodePagePosition) {
+      throw new Error("Both nodes must have a 'nodePagePosition' property.");
+    }
+    if (typeof node1.screenSize.screen.width !== 'number' || typeof node2.screenSize.screen.width !== 'number') {
+      throw new Error("Screen width must be a number.");
+    }
+    if (typeof node1.screenSize.screen.height !== 'number' || typeof node2.screenSize.screen.height !== 'number') {
+      throw new Error("Screen height must be a number.");
+    }
+    if (typeof node1.nodePagePosition.left !== 'number' || typeof node2.nodePagePosition.left !== 'number') {
+      throw new Error("Node page position left must be a number.");
+    }
+    if (typeof node1.nodePagePosition.top !== 'number' || typeof node2.nodePagePosition.top !== 'number') {
+      throw new Error("Node page position top must be a number.");
+    }
+
+    let dist;
+    let x, y;
+    // if screen size is available then calculating distance based on screen size
+    if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+      x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+      y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+    } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+      x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+      y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+    } else {
+      x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+      y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+    }
+    dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+    return Math.abs(dist);
+  } catch (error) {
+    console.error('Failed to calculate distance:', error);
+    throw error;
+  }
+};

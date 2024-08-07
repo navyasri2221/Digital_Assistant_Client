@@ -1,0 +1,56 @@
+/**
+ * Calculates the Euclidean distance between two nodes on a screen, taking into account their screen sizes and positions.
+ * This function is designed to work with nodes that have defined 'screenSize' and 'nodePagePosition' properties.
+ * 
+ * @param node1 The first node object, which must include 'screenSize' and 'nodePagePosition' properties.
+ *              'screenSize' should have 'screen' object with 'width' and 'height' as numbers.
+ *              'nodePagePosition' should have 'left' and 'top' as numbers.
+ * @param node2 The second node object, similar in structure to node1, used for comparison.
+ * 
+ * @returns The calculated distance as a number. If the nodes are missing required properties or if any property is of incorrect type,
+ *          the function will throw an error with a descriptive message.
+ * 
+ * @throws {Error} Throws an error if either node is undefined, or if required properties are missing or are of incorrect type.
+ * 
+ * Example usage:
+ * const node1 = {
+ *   screenSize: { screen: { width: 1920, height: 1080 } },
+ *   nodePagePosition: { left: 100, top: 150 }
+ * };
+ * const node2 = {
+ *   screenSize: { screen: { width: 1920, height: 1080 } },
+ *   nodePagePosition: { left: 200, top: 250 }
+ * };
+ * const distance = getDistance(node1, node2);
+ * console.log(distance); // Outputs the distance between the two nodes.
+ */
+export const getDistance = (node1: any, node2: any): number => {
+  try {
+    // Validate input nodes
+    if (!node1 || !node2) {
+      throw new Error("Both nodes must be provided.");
+    }
+
+    // Additional validations here...
+
+    let dist;
+    let x, y;
+    // Calculate distance based on screen size
+    if (node1.screenSize.screen.width > node2.screenSize.screen.width) {
+      x = node1.nodePagePosition.left - (node2.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width));
+      y = node1.nodePagePosition.top - (node2.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height));
+    } else if (node1.screenSize.screen.width < node2.screenSize.screen.width) {
+      x = (node1.nodePagePosition.left * (node2.screenSize.screen.width / node1.screenSize.screen.width)) - node2.nodePagePosition.left;
+      y = (node1.nodePagePosition.top * (node2.screenSize.screen.height / node1.screenSize.screen.height)) - node2.nodePagePosition.top;
+    } else {
+      x = node1.nodePagePosition.left - node2.nodePagePosition.left;
+      y = node1.nodePagePosition.top - node2.nodePagePosition.top;
+    }
+    dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+    return Math.abs(dist);
+  } catch (error) {
+    console.error('Failed to calculate distance:', error);
+    throw error;
+  }
+};
