@@ -24,42 +24,36 @@ declare global {
  * @returns promise
  */
 
+// Record each user click action with session info
 export const recordClicks = async (request?: any) => {
   request.sessionid = await getSessionKey();
   const parameters = {
     url: ENDPOINT.Record,
-    method: "POST",
+    method: "POST", 
     body: request,
   };
   return REST.apiCal(parameters);
 };
 
 /**
- * Updates the record clicks.
- *
- * @param {any} request - The request object.
- * @return {Promise<any>} A promise that resolves with the result of the API call.
+ * Updates existing click records with new data.
+ * @param request - An object containing the updated data to be recorded, such as the clicked element and its metadata.
+ * @returns A promise that resolves when the updated click data has been successfully recorded.
  */
-
 export const updateRecordClicks = async (request?: any) => {
-  request.sessionid = await getSessionKey();
+  // Update existing click records with new data
+  request.sessionid = await getSessionKey(); // Add current session ID
   const parameters = {
     url: ENDPOINT.UpdateRecord,
     method: "POST",
-    body: request,
+    body: request, 
   };
-
   return REST.apiCal(parameters);
 };
 
-/**
- * To record set of actions/events belong to one recording
- * @param request
- * @returns promise
- */
-
+// Save complete sequence of user actions as a recording
 export const recordSequence = async (request?: any) => {
-  request.usersessionid = await getUserId();
+  request.usersessionid = await getUserId(); // Add user ID to request
   const parameters = {
     url: ENDPOINT.RecordSequence,
     method: "POST",
@@ -68,14 +62,10 @@ export const recordSequence = async (request?: any) => {
   return REST.apiCal(parameters);
 };
 
-/**
- * To record set of actions/events belong to one recording
- * @param request
- * @returns promise
- */
-
+// Track individual user clicks with domain info
 export const userClick = async (request?: any) => {
   request.usersessionid = await getUserId();
+  // Set domain if not provided
   if(!request.domain || request.domain === '') {
     request.domain = window.location.host;
   }
@@ -87,104 +77,62 @@ export const userClick = async (request?: any) => {
   return REST.apiCal(parameters);
 };
 
-export const deleteRecording = async (request?: any) => {
-  request.usersessionid = await getUserId();
-  const parameters = {
-    url: ENDPOINT.DeleteSequence,
-    method: "POST",
-    body: request,
-  };
-  return REST.apiCal(parameters);
-};
-
-export const updateRecording = async (request?: any) => {
-  request.usersessionid = await getUserId();
-  const parameters = {
-    url: ENDPOINT.updateRecordSequence,
-    method: "POST",
-    body: request,
-  };
-  return await REST.apiCal(parameters);
-};
-
-/**
- * To check profanity validation/filters for sequence name/labels
- * @param request
- * @returns promise
- */
-
-export const profanityCheck = async (request?: any) => {
-  const headers = new Headers();
-  headers.append("Content-Type", "text/plain");
-  headers.append("Ocp-Apim-Subscription-Key", CONFIG.profanity.config.key1);
-  const parameters = {
-    url: ENDPOINT.ProfanityCheck,
-    method: "POST",
-    body: request,
-    headers,
-  };
-  return REST.apiCal(parameters);
-};
-
-/**
- * To save click data to REST
- * @param node HTMLElement
- * @param text
- * @param meta
- * @returns promise
- */
+// Save detailed click data including node info and positioning
 export const saveClickData = async (node: any, text: string, meta: any) => {
-  // removing circular reference before converting to json with deep clone.
+  // Clone node to remove circular references
   const processedNode = await node.cloneNode(true);
 
-  console.log(getAbsoluteOffsets(processedNode));
-
+  // Convert node to JSON with metadata
   let objectData: any = domJSON.toJSON(processedNode, {serialProperties: true});
-  if (objectData.meta) {
-    objectData.meta = meta;
-  } else {
-    objectData.meta = meta;
-  }
+  objectData.meta = objectData.meta || meta;
 
-  //removing the unwanted attributes which were added while processing click objects.
+  // Clean up internal tracking attributes
   delete(objectData.node.addedClickRecord);
   delete(objectData.node.hasClick);
   delete(objectData.node.udaIgnoreChildren);
   delete(objectData.node.udaIgnoreClick);
 
-  if (inArray(node.nodeName.toLowerCase(), CONFIG.ignoreNodesFromIndexing) !== -1 && CONFIG.customNameForSpecialNodes.hasOwnProperty(node.nodeName.toLowerCase())) {
+  // Add special node handling for specific elements
+  if (inArray(node.nodeName.toLowerCase(), CONFIG.ignoreNodesFromIndexing) !== -1) {
     objectData.meta.displayText = CONFIG.customNameForSpecialNodes[node.nodeName.toLowerCase()];
   }
 
+  // Preserve outer HTML if missing
   if (!objectData.node.outerHTML) {
     objectData.node.outerHTML = node.outerHTML;
   }
 
+  // Add positioning and node info
   objectData.offset = getAbsoluteOffsets(node);
   objectData.node.nodeInfo = getNodeInfo(node);
 
-  // Added to handle the case where screen size is not available
+  // Validate screen size data
   if(objectData.node.nodeInfo && (!objectData.node.nodeInfo.screenSize.screen.width || !objectData.node.nodeInfo.screenSize.screen.height)){
     return false;
   }
 
-  const {enableNodeTypeChangeSelection} = CONFIG;
-
-  if(enableNodeTypeChangeSelection) {
+  // Add element type detection if enabled
+  if(CONFIG.enableNodeTypeChangeSelection) {
     objectData.meta.systemDetected = mapClickedElementToHtmlFormElement(node);
     if (objectData.meta.systemDetected.inputElement !== 'others') {
       objectData.meta.selectedElement = objectData.meta.systemDetected;
     }
   }
 
+  // Log debug info
   UDAConsoleLogger.info(objectData, 3);
 
-  // let domain = fetchDomain();
+  // Prepare final payload
   let domain = window.location.host;
   const jsonString = TSON.stringify(objectData);
 
-  UDAConsoleLogger.info(jsonString, 1);
-
+ /**  Constructs the final payload object to be sent for recording user click data. The payload includes the following properties:
+  - `domain`: The domain of the current window location.
+  - `urlpath`: The pathname of the current window location.
+  - `clickednodename`: The text content of the clicked node.
+  - `html5`: A flag indicating whether the clicked node is an HTML5 element (set to 0 in this case).
+  - `clickedpath`: An empty string representing the clicked path (not used in this case).
+  - `objectdata`: A stringified JSON representation of the processed node data.**/
   return {
     domain: domain,
     urlpath: window.location.pathname,
@@ -195,32 +143,26 @@ export const saveClickData = async (node: any, text: string, meta: any) => {
   };
 };
 
-/**
- * * To post click sequence data to REST
- * @param request
- * @returns promise
- */
+// Post complete recording sequence data
 export const postRecordSequenceData = async (request: any) => {
   window.udanSelectedNodes = [];
   const userclicknodesSet = getFromStore(CONFIG.RECORDING_SEQUENCE, false);
   const ids = userclicknodesSet.map((item: any) => item.id);
   let domain = fetchDomain();
+  
+  // Construct payload with sequence metadata
   const payload = {
     ...request,
     domain: domain,
     isIgnored: 0,
-    isValid: 1,
+    isValid: 1, 
     userclicknodelist: ids.join(","),
     userclicknodesSet,
   };
   return await recordSequence(payload);
 };
 
-/**
- * To update click data to REST
- * @returns  promise
- * @param request
- */
+// Track user click analytics data
 export const recordUserClickData = async (clickType='sequencerecord', clickedName='', recordId: number = 0) => {
   const payload = {
     usersessionid: await getSessionKey(),
@@ -229,7 +171,7 @@ export const recordUserClickData = async (clickType='sequencerecord', clickedNam
     recordid: recordId,
   };
 
-  // Sending events to google analytics
+  // Send event to Google Analytics
   ReactGA.event({
     category: clickType,
     action: clickType,
