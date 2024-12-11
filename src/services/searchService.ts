@@ -1,3 +1,10 @@
+/**
+ * Search Service
+ *
+ * This module provides functions for searching and fetching data from the backend.
+ *
+ * @module searchService
+ */
 import { ENDPOINT } from "../config/endpoints";
 import { recordUserClickData, REST } from ".";
 import { specialNodes } from "../util/specialNodes";

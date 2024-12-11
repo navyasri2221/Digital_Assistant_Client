@@ -24,7 +24,6 @@ jest.mock("../services/userService", () => ({
 // Mock the `UDAErrorLogger` object from the `config/error-log` module to
 // prevent the actual implementation from being called during testing.
 // This is necessary because the `fetchSearchResults` function calls the
-// `error` method of the `UDAErrorLogger` object if an error occurs.
 jest.mock("../config/error-log", () => ({
   UDAErrorLogger: {
     // Mock the `error` method of the `UDAErrorLogger` object to prevent it

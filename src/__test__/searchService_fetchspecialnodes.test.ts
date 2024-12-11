@@ -16,8 +16,6 @@ import { fetchSpecialNodes } from "../services/searchService";
 import { specialNodes } from "../util/specialNodes";
 
 /**
- * Mocks the `getUserId` function from the `../services/userService` module to return a fixed value of `"test-user-id"` during testing.
- *
  * This mock is used to prevent the actual implementation of the `getUserId` function from being called during unit tests, which could interfere with the test results.
  */
 jest.mock("../services/userService", () => ({

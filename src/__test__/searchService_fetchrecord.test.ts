@@ -18,9 +18,6 @@ import { specialNodes } from "../util/specialNodes";
 import * as specialNodesMock from "../util/specialNodes";
 import * as searchService from "../services/searchService";
 
-/**
- * Mocks the `getUserId` function from the `../services/userService` module to return a constant value of `"test-user-id"` during testing.
- */
 jest.mock("../services/userService", () => ({
   getUserId: jest.fn().mockResolvedValue("test-user-id"),
 }));
