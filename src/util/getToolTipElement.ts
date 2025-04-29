@@ -91,7 +91,7 @@ export const getToolTipElement = (message = 'Please input the value and then cli
     /*document.addEventListener('keydown', (event) => {
       if (!tooltipDivElement.isConnected) return;
 
-      switch(event.key) {
+     switch(event.key) {
         case 'ArrowUp':
           currentPosition = 'top';
           trigger("ChangeTooltipPosition", {detail: {position: 'top'}});
