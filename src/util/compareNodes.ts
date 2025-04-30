@@ -6,7 +6,6 @@
  * properties, and child nodes. The comparison is used during replay to find the best
  * matching element in the current DOM that corresponds to a recorded element.
  */
-
 import {CONFIG} from "../config";
 import {jaroWinkler} from "jaro-winkler-typescript";
 import {UDAConsoleLogger, UDAErrorLogger} from "../config/error-log";

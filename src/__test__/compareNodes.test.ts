@@ -22,7 +22,6 @@
  * - Tracking of unmatched attributes
  * - Special handling for select elements with childNodes
  */
-
 import { compareNodes } from '../util/compareNodes';
 import { CONFIG } from '../config';
 import { jaroWinkler } from 'jaro-winkler-typescript';
